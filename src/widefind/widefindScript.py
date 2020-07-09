@@ -29,7 +29,7 @@ rabbit_handler = RabbitMQHandlerOneWay(
    username=config['rabbitmq']['username'],
    password=config['rabbitmq']['password'],
    connection_params={
-      'virtual_host':'admin',
+      'virtual_host':'/',
       'connection_attempts': 3,
       'socket_timeout': 5000
    })
@@ -51,7 +51,9 @@ def init_client():
    client.on_message = on_message
    client.connect(broker_url, broker_port)
    client.loop_start()
-   client.subscribe("#")
+   #client.subscribe("#")
+   client.subscribe("ltu-system/#")
+   #client.subscribe("wispr/anchor/#")
    logger.info("Initialized mqtt connection")
 
 def on_message(client, userdata, message):
@@ -83,9 +85,9 @@ def send_data():
       logger.debug("Sending message: {}".format(formated_message))
       message = json.dumps(formated_message)
       channel.basic_publish(exchange=config['rabbitmq']['sensor_exchange'],
-                           routing_key="",
+                           routing_key = config['rabbitmq']['routing_key'],
                            body = message
-      )   
+      )
 
 if __name__ == '__main__':
    init_client()
